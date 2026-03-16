@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Melissa Girgin — Systems Engineer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+  :root {
+    --black: #0a0a0a;
+    --white: #e8e0d0;
+    --accent: #c8b89a;
+    --dim: #3a3530;
+    --mid: #6a5f52;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+
+  /* DITHER PATTERNS */
+  .dither-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.07;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect x='0' y='0' width='1' height='1' fill='white'/%3E%3Crect x='2' y='2' width='1' height='1' fill='white'/%3E%3C/svg%3E");
+    background-size: 4px 4px;
+  }
+
+  .scanlines {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.15) 2px,
+      rgba(0,0,0,0.15) 4px
+    );
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 16px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--dim);
+    background: var(--black);
+    mix-blend-mode: normal;
+  }
+
+  nav::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 0; right: 0;
+    height: 3px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='3'%3E%3Crect x='0' y='0' width='1' height='1' fill='%23e8e0d0'/%3E%3Crect x='2' y='2' width='1' height='1' fill='%23e8e0d0'/%3E%3C/svg%3E") repeat-x;
+  }
+
+  .nav-logo {
+    font-family: 'VT323', monospace;
+    font-size: 28px;
+    letter-spacing: 4px;
+    color: var(--white);
+    text-transform: uppercase;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    transition: color 0.1s;
+    position: relative;
+  }
+
+  .nav-links a::before {
+    content: '> ';
+    opacity: 0;
+    transition: opacity 0.1s;
+  }
+
+  .nav-links a:hover { color: var(--white); }
+  .nav-links a:hover::before { opacity: 1; }
+
+  /* MAIN CONTENT */
+  main {
+    position: relative;
+    z-index: 1;
+    padding-top: 80px;
+  }
+
+  section {
+    padding: 80px 40px;
+    max-width: 1100px;
+    margin: 0 auto;
+    border-bottom: 1px solid var(--dim);
+  }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 120px;
+    border-bottom: 1px solid var(--dim);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-dither-block {
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 420px;
+    height: 420px;
+    opacity: 0.12;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect x='0' y='0' width='2' height='2' fill='white'/%3E%3Crect x='4' y='0' width='2' height='2' fill='white'/%3E%3Crect x='2' y='2' width='2' height='2' fill='white'/%3E%3Crect x='6' y='2' width='2' height='2' fill='white'/%3E%3Crect x='0' y='4' width='2' height='2' fill='white'/%3E%3Crect x='4' y='4' width='2' height='2' fill='white'/%3E%3Crect x='2' y='6' width='2' height='2' fill='white'/%3E%3Crect x='6' y='6' width='2' height='2' fill='white'/%3E%3C/svg%3E");
+    border-radius: 50%;
+  }
+
+  .hero-tag {
+    font-size: 11px;
+    letter-spacing: 5px;
+    color: var(--mid);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    animation: fadeIn 0.6s ease forwards;
+  }
+
+  .hero-tag::before { content: '[ '; }
+  .hero-tag::after { content: ' ]'; }
+
+  h1 {
+    font-family: 'VT323', monospace;
+    font-size: clamp(72px, 10vw, 140px);
+    line-height: 0.9;
+    letter-spacing: -2px;
+    color: var(--white);
+    margin-bottom: 8px;
+    animation: glitch 0.1s infinite;
+  }
+
+  @keyframes glitch {
+    0%, 95%, 100% { text-shadow: none; transform: none; }
+    96% { text-shadow: -2px 0 #ff0040, 2px 0 #0040ff; transform: skewX(-0.5deg); }
+    98% { text-shadow: 2px 0 #ff0040, -2px 0 #0040ff; transform: skewX(0.5deg); }
+  }
+
+  .hero-subtitle {
+    font-family: 'VT323', monospace;
+    font-size: 32px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    margin-bottom: 40px;
+    animation: fadeIn 0.8s ease forwards;
+  }
+
+  .hero-desc {
+    max-width: 560px;
+    color: var(--accent);
+    font-size: 13px;
+    line-height: 1.8;
+    margin-bottom: 48px;
+    animation: fadeIn 1s ease forwards;
+  }
+
+  .hero-links {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 10px 24px;
+    border: 1px solid var(--white);
+    color: var(--white);
+    text-decoration: none;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    transition: all 0.1s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--white);
+    transform: translateX(-100%);
+    transition: transform 0.15s;
+    z-index: -1;
+  }
+
+  .btn:hover { color: var(--black); }
+  .btn:hover::before { transform: translateX(0); }
+
+  .btn-ghost {
+    border-color: var(--mid);
+    color: var(--mid);
+  }
+  .btn-ghost::before { background: var(--mid); }
+  .btn-ghost:hover { color: var(--black); }
+
+  /* SECTION HEADERS */
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 6px;
+    color: var(--mid);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  h2 {
+    font-family: 'VT323', monospace;
+    font-size: 56px;
+    color: var(--white);
+    margin-bottom: 48px;
+    line-height: 1;
+    letter-spacing: 2px;
+  }
+
+  /* DITHER DIVIDER */
+  .dither-divider {
+    width: 100%;
+    height: 8px;
+    margin: 0 0 48px 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='8'%3E%3Crect x='0' y='0' width='4' height='2' fill='%23e8e0d0'/%3E%3Crect x='0' y='2' width='2' height='2' fill='%23e8e0d0'/%3E%3Crect x='0' y='4' width='1' height='2' fill='%23e8e0d0'/%3E%3C/svg%3E") repeat-x;
+    opacity: 0.4;
+  }
+
+  /* ABOUT */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: start;
+  }
+
+  .about-text p {
+    color: var(--accent);
+    margin-bottom: 16px;
+    line-height: 1.8;
+  }
+
+  .about-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--dim);
+    border: 1px solid var(--dim);
+  }
+
+  .stat-box {
+    background: var(--black);
+    padding: 24px;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'VT323', monospace;
+    font-size: 48px;
+    color: var(--white);
+    display: block;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--mid);
+    text-transform: uppercase;
+    margin-top: 4px;
+    display: block;
+  }
+
+  /* EXPERIENCE */
+  .timeline {
+    position: relative;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: repeating-linear-gradient(to bottom, var(--dim) 0px, var(--dim) 4px, transparent 4px, transparent 8px);
+  }
+
+  .timeline-item {
+    padding-left: 40px;
+    margin-bottom: 48px;
+    position: relative;
+  }
+
+  .timeline-item::before {
+    content: '◆';
+    position: absolute;
+    left: -7px;
+    top: 2px;
+    font-size: 10px;
+    color: var(--white);
+    background: var(--black);
+    padding: 2px 0;
+  }
+
+  .timeline-role {
+    font-family: 'VT323', monospace;
+    font-size: 28px;
+    color: var(--white);
+    letter-spacing: 1px;
+  }
+
+  .timeline-company {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin: 4px 0 12px 0;
+  }
+
+  .timeline-date {
+    font-size: 10px;
+    color: var(--mid);
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+
+  .timeline-desc {
+    color: var(--accent);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  /* PROJECTS */
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1px;
+    background: var(--dim);
+    border: 1px solid var(--dim);
+  }
+
+  .project-card {
+    background: var(--black);
+    padding: 28px;
+    transition: background 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .project-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--white);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.2s;
+  }
+
+  .project-card:hover { background: #111; }
+  .project-card:hover::before { transform: scaleX(1); }
+
+  .project-num {
+    font-family: 'VT323', monospace;
+    font-size: 48px;
+    color: var(--dim);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+
+  .project-title {
+    font-family: 'VT323', monospace;
+    font-size: 24px;
+    color: var(--white);
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+  }
+
+  .project-desc {
+    font-size: 12px;
+    color: var(--mid);
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+
+  .project-link {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  .project-link:hover { color: var(--white); }
+  .project-link::after { content: ' →'; }
+
+  /* SKILLS */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+  }
+
+  .skill-group h3 {
+    font-family: 'VT323', monospace;
+    font-size: 22px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--dim);
+  }
+
+  .skill-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border: 1px solid var(--dim);
+    font-size: 11px;
+    color: var(--mid);
+    letter-spacing: 1px;
+    margin: 3px 3px 3px 0;
+    transition: all 0.1s;
+  }
+
+  .skill-tag:hover {
+    border-color: var(--white);
+    color: var(--white);
+  }
+
+  /* CERTS */
+  .certs-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--dim);
+    border: 1px solid var(--dim);
+  }
+
+  .cert-item {
+    background: var(--black);
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.1s;
+  }
+
+  .cert-item:hover { background: #111; }
+
+  .cert-name {
+    font-size: 13px;
+    color: var(--white);
+  }
+
+  .cert-issuer {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--mid);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .cert-date {
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 1px;
+    text-align: right;
+  }
+
+  /* CONTACT */
+  #contact {
+    text-align: center;
+    padding: 100px 40px;
+    border-bottom: none;
+  }
+
+  .contact-text {
+    font-family: 'VT323', monospace;
+    font-size: 72px;
+    color: var(--white);
+    line-height: 0.9;
+    margin-bottom: 16px;
+    letter-spacing: 2px;
+  }
+
+  .contact-sub {
+    color: var(--mid);
+    font-size: 12px;
+    letter-spacing: 3px;
+    margin-bottom: 48px;
+    text-transform: uppercase;
+  }
+
+  .contact-links {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  /* FOOTER */
+  footer {
+    position: relative;
+    z-index: 1;
+    padding: 20px 40px;
+    border-top: 1px solid var(--dim);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    color: var(--mid);
+    letter-spacing: 2px;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* CURSOR BLINK */
+  .blink {
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* PIXEL NOISE OVERLAY */
+  .noise {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    .nav-links { gap: 16px; }
+    section { padding: 60px 20px; }
+    .about-grid { grid-template-columns: 1fr; }
+    .skills-grid { grid-template-columns: 1fr 1fr; }
+    .certs-list { grid-template-columns: 1fr; }
+    h1 { font-size: 72px; }
+    .contact-text { font-size: 48px; }
+    footer { flex-direction: column; gap: 8px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="dither-bg"></div>
+<div class="scanlines"></div>
+<div class="noise"></div>
+
+<nav>
+  <div class="nav-logo">M.G<span class="blink">_</span></div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#certs">Certs</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<main>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-dither-block"></div>
+    <p class="hero-tag">Systems & Automation Engineer</p>
+    <h1>MELISSA<br>GIRGIN</h1>
+    <p class="hero-subtitle">// INNSBRUCK, AUSTRIA</p>
+    <p class="hero-desc">
+      Building systems that don't break under pressure — ML pipelines with uncertainty control, 
+      risk-constrained automation, and failure-resilient architectures. 
+      Engineering student by day, everything else by night.
+    </p>
+    <div class="hero-links">
+      <a href="#projects" class="btn">View Projects</a>
+      <a href="https://www.linkedin.com/in/melissa-girgin" target="_blank" class="btn btn-ghost">LinkedIn</a>
+      <a href="https://github.com/monanyx" target="_blank" class="btn btn-ghost">GitHub</a>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <p class="section-label">// 001</p>
+    <h2>ABOUT</h2>
+    <div class="dither-divider"></div>
+    <div class="about-grid fade-in">
+      <div class="about-text">
+        <p>
+          Electrical & Electronics Engineering student at Universität Innsbruck, 
+          pursuing reliability over raw performance. I design systems that acknowledge 
+          uncertainty — and act accordingly.
+        </p>
+        <p>
+          My work spans ML pipelines, decision automation, proprietary trading systems, 
+          and mechatronics. I care about what happens when things go wrong, not just 
+          when they go right.
+        </p>
+        <p>
+          When I'm not engineering, I run CTFs, contribute to cybersecurity community 
+          initiatives, and grind through Kaggle competitions.
+        </p>
+      </div>
+      <div class="about-stats">
+        <div class="stat-box">
+          <span class="stat-num">3+</span>
+          <span class="stat-label">Years Active</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num">7+</span>
+          <span class="stat-label">Certifications</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num">10+</span>
+          <span class="stat-label">Years Sec Research</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num">∞</span>
+          <span class="stat-label">Failure Modes Tested</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section id="experience">
+    <p class="section-label">// 002</p>
+    <h2>EXPERIENCE</h2>
+    <div class="dither-divider"></div>
+    <div class="timeline">
+
+      <div class="timeline-item fade-in">
+        <div class="timeline-role">Independent Systems & Automation Engineer</div>
+        <div class="timeline-company">Self Employed · Contract · Remote</div>
+        <div class="timeline-date">FEB 2026 — PRESENT</div>
+        <div class="timeline-desc">
+          Design and implement automation and decision-support systems under real-world constraints: 
+          risk limits, uncertainty, and partial failure. Build end-to-end ML pipelines with 
+          uncertainty handling, confidence thresholds, and human-in-the-loop control. 
+          Prioritize reliability, risk control, and maintainability over predictive performance.
+        </div>
+      </div>
+
+      <div class="timeline-item fade-in">
+        <div class="timeline-role">Proprietary Trader</div>
+        <div class="timeline-company">FTMO · Freelance · Remote</div>
+        <div class="timeline-date">OCT 2025 — PRESENT</div>
+        <div class="timeline-desc">
+          Systematic, rule-based market execution under predefined risk and execution rules. 
+          Risk control, position sizing, drawdown management. Disciplined execution under 
+          time and capital constraints.
+        </div>
+      </div>
+
+      <div class="timeline-item fade-in">
+        <div class="timeline-role">Crew Member</div>
+        <div class="timeline-company">McDonald's · Part-Time · Innsbruck</div>
+        <div class="timeline-date">MAY 2024 — PRESENT</div>
+        <div class="timeline-desc">
+          ~25 hrs/week alongside full-time engineering studies. 
+          Fast-paced operations requiring reliability, attention to detail, and time management.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <p class="section-label">// 003</p>
+    <h2>PROJECTS</h2>
+    <div class="dither-divider"></div>
+    <div class="projects-grid">
+
+      <div class="project-card fade-in">
+        <div class="project-num">01</div>
+        <div class="project-title">ML Pipeline w/ Uncertainty & Overrides</div>
+        <div class="project-desc">
+          End-to-end ML pipeline with uncertainty estimation and confidence-based decision thresholds. 
+          Human-in-the-loop overrides prevent automated actions under low-confidence or anomalous conditions.
+        </div>
+        <a href="https://github.com/monanyx" target="_blank" class="project-link">View on GitHub</a>
+      </div>
+
+      <div class="project-card fade-in">
+        <div class="project-num">02</div>
+        <div class="project-title">Risk-Constrained Decision Automation (risq1071)</div>
+        <div class="project-desc">
+          Decision automation engine that acts only under safe, controlled conditions. 
+          Every action evaluated through layered risk, execution, and uncertainty gates. 
+          Hard stops enforced.
+        </div>
+        <a href="https://github.com/monanyx/risq1071" target="_blank" class="project-link">View on GitHub</a>
+      </div>
+
+      <div class="project-card fade-in">
+        <div class="project-num">03</div>
+        <div class="project-title">Predictive Maintenance — NASA Turbofan (C-MAPSS)</div>
+        <div class="project-desc">
+          Production-style ML system predicting engine health from raw sensor streams. 
+          Outputs AUTO / REVIEW / BLOCK decisions. Risk-aware decision pipeline from 
+          noisy sensor data to actionable signals.
+        </div>
+        <a href="https://github.com/monanyx" target="_blank" class="project-link">View on GitHub</a>
+      </div>
+
+      <div class="project-card fade-in">
+        <div class="project-num">04</div>
+        <div class="project-title">System Stress & Failure Simulation Framework</div>
+        <div class="project-desc">
+          Framework simulating partial failures, degraded inputs, and operational stress. 
+          Analyzes degradation patterns and recovery behavior. Stress-testing results 
+          inform safeguard and resilience strategies.
+        </div>
+        <a href="https://github.com/monanyx" target="_blank" class="project-link">View on GitHub</a>
+      </div>
+
+      <div class="project-card fade-in">
+        <div class="project-num">05</div>
+        <div class="project-title">Crypto Exchange Trades — Real-Time GCP</div>
+        <div class="project-desc">
+          Tracking cryptocurrency exchange trades with Google Cloud Platform in real-time. 
+          Exploring public cryptocurrency datasets in BigQuery.
+        </div>
+        <a href="https://github.com/monanyx" target="_blank" class="project-link">View on GitHub</a>
+      </div>
+
+      <div class="project-card fade-in">
+        <div class="project-num">06</div>
+        <div class="project-title">Kaggle ML Competitions</div>
+        <div class="project-desc">
+          Ongoing participation in Kaggle challenges sharpening data handling 
+          and model evaluation on realistic, noisy datasets. 
+          Associated with Universität Innsbruck.
+        </div>
+        <a href="https://github.com/monanyx" target="_blank" class="project-link">View on GitHub</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <p class="section-label">// 004</p>
+    <h2>SKILLS</h2>
+    <div class="dither-divider"></div>
+    <div class="skills-grid fade-in">
+      <div class="skill-group">
+        <h3>Engineering</h3>
+        <span class="skill-tag">Systems Design</span>
+        <span class="skill-tag">Automation</span>
+        <span class="skill-tag">ML Pipelines</span>
+        <span class="skill-tag">Uncertainty Estimation</span>
+        <span class="skill-tag">Failure Simulation</span>
+        <span class="skill-tag">Mechatronics</span>
+        <span class="skill-tag">Electrical Engineering</span>
+      </div>
+      <div class="skill-group">
+        <h3>Languages & Tools</h3>
+        <span class="skill-tag">Python</span>
+        <span class="skill-tag">C</span>
+        <span class="skill-tag">C++</span>
+        <span class="skill-tag">Bash</span>
+        <span class="skill-tag">Shell Scripting</span>
+        <span class="skill-tag">SQL</span>
+        <span class="skill-tag">BigQuery</span>
+        <span class="skill-tag">GCP</span>
+        <span class="skill-tag">Algorithms</span>
+      </div>
+      <div class="skill-group">
+        <h3>Finance & Security</h3>
+        <span class="skill-tag">Proprietary Trading</span>
+        <span class="skill-tag">Backtesting</span>
+        <span class="skill-tag">Risk Management</span>
+        <span class="skill-tag">Penetration Testing</span>
+        <span class="skill-tag">Vulnerability Assessment</span>
+        <span class="skill-tag">Threat Modeling</span>
+        <span class="skill-tag">CTF Competitions</span>
+        <span class="skill-tag">Privacy Tech</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CERTS -->
+  <section id="certs">
+    <p class="section-label">// 005</p>
+    <h2>CERTIFICATIONS</h2>
+    <div class="dither-divider"></div>
+    <div class="certs-list fade-in">
+      <div class="cert-item">
+        <div>
+          <div class="cert-name">Google Advanced Data Analytics</div>
+          <div class="cert-issuer">Google</div>
+        </div>
+        <div class="cert-date">—</div>
+      </div>
+      <div class="cert-item">
+        <div>
+          <div class="cert-name">SAP Business Analyst Professional</div>
+          <div class="cert-issuer">SAP</div>
+        </div>
+        <div class="cert-date">MAR 2026</div>
+      </div>
+      <div class="cert-item">
+        <div>
+          <div class="cert-name">DeepLearning.AI Data Engineering Professional</div>
+          <div class="cert-issuer">DeepLearning.AI</div>
+        </div>
+        <div class="cert-date">MAR 2026</div>
+      </div>
+      <div class="cert-item">
+        <div>
+          <div class="cert-name">Google Business Intelligence Professional</div>
+          <div class="cert-issuer">Google</div>
+        </div>
+        <div class="cert-date">MAR 2026</div>
+      </div>
+      <div class="cert-item">
+        <div>
+          <div class="cert-name">IBM AI Engineering Professional</div>
+          <div class="cert-issuer">IBM</div>
+        </div>
+        <div class="cert-date">MAR 2026</div>
+      </div>
+      <div class="cert-item">
+        <div>
+          <div class="cert-name">FTMO Academy — Risk Management</div>
+          <div class="cert-issuer">FTMO</div>
+        </div>
+        <div class="cert-date">—</div>
+      </div>
+      <div class="cert-item">
+        <div>
+          <div class="cert-name">CS50 & CS50AI</div>
+          <div class="cert-issuer">Harvard University</div>
+        </div>
+        <div class="cert-date">JAN 2024</div>
+      </div>
+      <div class="cert-item">
+        <div>
+          <div class="cert-name">42 Vienna — Piscine Program</div>
+          <div class="cert-issuer">42 Vienna</div>
+        </div>
+        <div class="cert-date">MAR 2025</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EDUCATION -->
+  <section id="education">
+    <p class="section-label">// 006</p>
+    <h2>EDUCATION</h2>
+    <div class="dither-divider"></div>
+    <div class="timeline">
+      <div class="timeline-item fade-in">
+        <div class="timeline-role">BSc Electrical & Electronics Engineering</div>
+        <div class="timeline-company">Universität Innsbruck</div>
+        <div class="timeline-date">OCT 2024 — MAR 2029</div>
+        <div class="timeline-desc">
+          B2 German proficiency (Vorstudienlehrgang). Currently pursuing Bachelor of Engineering 
+          in Electrical and Electronics Engineering.
+        </div>
+      </div>
+      <div class="timeline-item fade-in">
+        <div class="timeline-role">Meister für Mechatronik (Self-Study, In Progress)</div>
+        <div class="timeline-company">Austrian Master Craftsman Examination</div>
+        <div class="timeline-date">MAR 2026 — MAR 2029</div>
+        <div class="timeline-desc">
+          Independent preparation across 5 modules: business management, training methodology, 
+          technical theory, practical workshop, and oral examination.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <p class="section-label">// 007</p>
+    <div class="contact-text">LET'S<br>BUILD<br>SOMETHING.</div>
+    <p class="contact-sub">Reliable systems only. No exceptions.</p>
+    <div class="contact-links">
+      <a href="https://www.linkedin.com/in/melissa-girgin" target="_blank" class="btn">LinkedIn</a>
+      <a href="https://github.com/monanyx" target="_blank" class="btn btn-ghost">GitHub / monanyx</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>© 2026 MELISSA GIRGIN</span>
+  <span>INNSBRUCK, AUSTRIA</span>
+  <span>SYSTEMS & AUTOMATION<span class="blink">_</span></span>
+</footer>
+
+<script>
+  // Scroll fade-in
+  const fadeEls = document.querySelectorAll('.fade-in');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  fadeEls.forEach(el => observer.observe(el));
+
+  // Scanline flicker
+  const scanlines = document.querySelector('.scanlines');
+  setInterval(() => {
+    scanlines.style.opacity = (Math.random() * 0.05 + 0.02).toFixed(3);
+  }, 150);
+
+  // Pixel cursor trail
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:fixed;inset:0;z-index:999;pointer-events:none;';
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+
+  let dots = [];
+  window.addEventListener('mousemove', e => {
+    if (Math.random() > 0.6) {
+      dots.push({ x: Math.round(e.clientX/4)*4, y: Math.round(e.clientY/4)*4, life: 12 });
+    }
+  });
+
+  function drawDots() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    dots = dots.filter(d => d.life > 0);
+    dots.forEach(d => {
+      ctx.fillStyle = `rgba(232, 224, 208, ${d.life / 24})`;
+      ctx.fillRect(d.x, d.y, 2, 2);
+      d.life--;
+    });
+    requestAnimationFrame(drawDots);
+  }
+  drawDots();
+</script>
+
+</body>
+</html>
