@@ -271,8 +271,12 @@ const player = {
   walkFrame: 0,
   walkTimer: 0,
   moving: false,
+  velocityY: 0,
+  isGrounded: false,
+  jumpPower: 400,
+  gravityAccel: 900,
+  maxFallSpeed: 600,
 };
-const cam = { x: 0, y: 0 };
 
 // ════════════════════════════════════════
 //  INPUT
@@ -370,15 +374,10 @@ function gameLoop(ts) {
   lastTime = ts;
   gameTime = ts;
   update(dt);
-  render(ts);
-  requestAnimationFrame(gameLoop);
-}
-
-function update(dt) {
-  let dx = 0, dy = 0;
+  function update(dt) {
+  let dx = 0;
 
   if (travelTarget) {
-    // Smooth travel toward target
     const tdx = travelTarget.x - player.x;
     const tdy = travelTarget.y - player.y;
     const dist = Math.sqrt(tdx*tdx + tdy*tdy);
@@ -392,28 +391,40 @@ function update(dt) {
       player.y += (tdy / dist) * Math.min(spd, dist);
     }
   } else {
-    if (keys.has('w') || keys.has('arrowup'))    dy = -1;
-    if (keys.has('s') || keys.has('arrowdown'))  dy =  1;
+    // Horizontal input only
     if (keys.has('a') || keys.has('arrowleft'))  dx = -1;
     if (keys.has('d') || keys.has('arrowright')) dx =  1;
-    if (dx !== 0 && dy !== 0) { dx *= 0.7071; dy *= 0.7071; }
 
-    if      (dx > 0)  player.facing = 'right';
-    else if (dx < 0)  player.facing = 'left';
-    else if (dy > 0)  player.facing = 'down';
-    else if (dy < 0)  player.facing = 'up';
+    player.moving = dx !== 0;
+    if (dx > 0)  player.facing = 'right';
+    if (dx < 0)  player.facing = 'left';
 
-    player.moving = dx !== 0 || dy !== 0;
     if (player.moving) {
       player.walkTimer += dt;
       if (player.walkTimer > 0.13) { player.walkFrame = (player.walkFrame + 1) % 4; player.walkTimer = 0; }
     }
 
     const nx = player.x + dx * player.speed * dt;
-    const ny = player.y + dy * player.speed * dt;
-    // Border clamp
     player.x = Math.max(TSIZE * 0.6, Math.min(WW - TSIZE * 0.6, nx));
-    player.y = Math.max(TSIZE * 0.6, Math.min(WH - TSIZE * 0.6, ny));
+
+    // GRAVITY
+    player.velocityY += player.gravityAccel * dt;
+    player.velocityY = Math.min(player.velocityY, player.maxFallSpeed);
+    player.y += player.velocityY * dt;
+
+    // GROUND CHECK
+    player.isGrounded = player.y >= WH - TSIZE - player.h;
+
+    if (player.isGrounded) {
+      player.velocityY = 0;
+      player.y = WH - TSIZE - player.h;
+    }
+
+    // JUMPING
+    if ((keys.has('w') || keys.has('arrowup')) && player.isGrounded) {
+      player.velocityY = -player.jumpPower;
+      player.isGrounded = false;
+    }
   }
 
   // Camera smooth follow
@@ -433,7 +444,7 @@ function update(dt) {
     onZoneEnter(newZone, prev);
   }
 
-  // XP bar — based on how far right the player has gone
+  // XP bar
   const progress = player.x / WW;
   document.getElementById('xp-bar-fill').style.width = (progress * 100) + '%';
   if (currentZone) {
@@ -441,6 +452,11 @@ function update(dt) {
     document.getElementById('level-name').textContent  = currentZone.levelName;
   }
 
+  // Hotbar active slot
+  document.querySelectorAll('.hotbar-slot').forEach((s, i) => {
+    s.classList.toggle('active', currentZone && i === currentZone.level);
+  });
+}
   // Hotbar active slot
   document.querySelectorAll('.hotbar-slot').forEach((s, i) => {
     s.classList.toggle('active', currentZone && i === currentZone.level);
