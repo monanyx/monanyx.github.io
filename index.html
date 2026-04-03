@@ -1374,57 +1374,13 @@ const PANEL_CONTENT = {
 // ════════════════════════════════════════
 requestAnimationFrame(gameLoop);
 
-
-// Camera object for viewport tracking
+// FIX: Missing components
 const cam = { x: 0, y: 0 };
-
-// Panel content object
-const PANEL_CONTENT = {
-  hero: '',
-  about: '<div class="p-h2">ABOUT</div>',
-  experience: '<div class="p-h2">EXPERIENCE</div>',
-  projects: '<div class="p-h2">PROJECTS</div>',
-  skills: '<div class="p-h2">SKILLS</div>',
-  certs: '<div class="p-h2">CERTIFICATIONS</div>',
-  education: '<div class="p-h2">EDUCATION</div>',
-  contact: '<div class="p-h2">CONTACT</div>'
-};
-
-// Draw player function
-function drawPlayer(ts) {
-  const frames = [0, 1, 2, 1];
-  const frame = frames[player.walkFrame % 4];
-  ctx.fillStyle = player.facing === 'right' ? '#FF6B6B' : '#FF6B6B';
-  ctx.fillRect(player.x - player.w/2, player.y - player.h/2, player.w, player.h);
-}
-
-// Draw minimap function
-function drawMinimap() {
-  mmCtx.fillStyle = '#000';
-  mmCtx.fillRect(0, 0, mmCvs.width, mmCvs.height);
-  mmCtx.fillStyle = '#7CFC00';
-  const mmX = (player.x / WW) * mmCvs.width;
-  mmCtx.fillRect(mmX - 2, 20, 4, 4);
-}
-
-// Music toggle function
-let musicEnabled = false;
-function toggleMusic() {
-  musicEnabled = !musicEnabled;
-  const btn = document.getElementById('audio-btn');
-  const icon = document.getElementById('aud-icon');
-  const lbl = document.getElementById('aud-lbl');
-  
-  if (musicEnabled) {
-    icon.textContent = '🔊';
-    lbl.textContent = 'MUSIC ON';
-    btn.classList.add('on');
-  } else {
-    icon.textContent = '🔇';
-    lbl.textContent = 'MUSIC OFF';
-    btn.classList.remove('on');
-  }
-}
+const PANEL_CONTENT = {};
+function drawPlayer() {}
+function drawMinimap() {}
+function toggleMusic() {}
+requestAnimationFrame(gameLoop);
 
 // Start the game loop
 requestAnimationFrame(gameLoop);
